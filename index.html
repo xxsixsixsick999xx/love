@@ -3,84 +3,132 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Love With Name</title>
+<title>Love Animation</title>
 
 <style>
 body {
-    margin: 0;
-    background: linear-gradient(135deg, #ff4d6d, #c9184a);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-    font-family: 'Arial', sans-serif;
+  margin: 0;
+  overflow: hidden;
+  background: radial-gradient(circle, #ff758f, #ff1e56);
+  font-family: Arial, sans-serif;
 }
 
 /* HEART */
 .heart {
-    position: relative;
-    width: 220px;
-    height: 220px;
-    background: #ff1e56;
-    transform: rotate(-45deg);
-    animation: beat 1s infinite;
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  transform: rotate(-45deg);
+  animation: beat 1.2s infinite;
 }
 
 .heart::before,
 .heart::after {
-    content: "";
-    position: absolute;
-    width: 220px;
-    height: 220px;
-    background: #ff1e56;
-    border-radius: 50%;
+  content: "";
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: inherit;
 }
 
 .heart::before {
-    top: -110px;
-    left: 0;
+  top: -70px;
+  left: 0;
 }
-
 .heart::after {
-    left: 110px;
-    top: 0;
+  left: 70px;
+  top: 0;
 }
 
 /* NAME */
 .name {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(45deg);
-    z-index: 10;
-    padding: 8px 18px;
-    background: rgba(0,0,0,0.25);
-    border-radius: 20px;
-    color: #fff;
-    font-size: 30px;
-    font-weight: bold;
-    letter-spacing: 2px;
-    text-shadow:
-        0 0 5px #fff,
-        0 0 10px #ffccd5,
-        0 0 20px #ff4d6d;
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  letter-spacing: 1px;
+  opacity: 0;
+  animation: fade 3s forwards;
+  text-shadow: 0 0 10px rgba(255,255,255,0.9);
 }
 
-/* ANIMATION */
+/* ANIMATIONS */
 @keyframes beat {
-    0% { transform: rotate(-45deg) scale(1); }
-    50% { transform: rotate(-45deg) scale(1.12); }
-    100% { transform: rotate(-45deg) scale(1); }
+  0% { transform: rotate(-45deg) scale(1); }
+  50% { transform: rotate(-45deg) scale(1.15); }
+  100% { transform: rotate(-45deg) scale(1); }
+}
+
+@keyframes fade {
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
 }
 </style>
 </head>
 
 <body>
 
-<div class="heart">
-    <div class="name">SYIFA</div>
-</div>
+<!-- MUSIK (akan aktif setelah tap) -->
+<audio id="music" loop>
+  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0f78faec3a.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const names = ["SYIFA", "AKU", "CINTA", "KAMU ❤️"];
+const colors = [
+  "linear-gradient(135deg,#ff4d6d,#ff758f)",
+  "linear-gradient(135deg,#ff9a9e,#fad0c4)",
+  "linear-gradient(135deg,#fbc2eb,#a6c1ee)",
+  "linear-gradient(135deg,#ffecd2,#fcb69f)",
+  "linear-gradient(135deg,#a18cd1,#fbc2eb)"
+];
+
+let musicStarted = false;
+
+function createLove(x, y) {
+  const heart = document.createElement("div");
+  heart.className = "heart";
+  heart.style.left = (x - 70) + "px";
+  heart.style.top = (y - 70) + "px";
+  heart.style.background = colors[Math.floor(Math.random() * colors.length)];
+
+  const name = document.createElement("div");
+  name.className = "name";
+  name.innerText = names[Math.floor(Math.random() * names.length)];
+
+  heart.appendChild(name);
+  document.body.appendChild(heart);
+
+  setTimeout(() => heart.remove(), 4000);
+}
+
+// TAP LAYAR
+document.addEventListener("click", (e) => {
+  createLove(e.clientX, e.clientY);
+
+  // Aktifkan musik (wajib tap di iOS)
+  if (!musicStarted) {
+    document.getElementById("music").play();
+    musicStarted = true;
+  }
+});
+
+// AUTO LOVE RANDOM
+setInterval(() => {
+  createLove(
+    Math.random() * window.innerWidth,
+    Math.random() * window.innerHeight
+  );
+}, 1200);
+</script>
 
 </body>
 </html>

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Love Kabur 10x</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Love Kabur Final</title>
 
 <style>
-  body{
+body{
     margin:0;
     height:100vh;
     overflow:hidden;
@@ -18,234 +18,175 @@
     align-items:center;
     color:#fff;
     text-align:center;
-  }
+}
 
-  .stage{
+/* AREA GERAK */
+.stage{
     position:relative;
     width:100vw;
     height:70vh;
-  }
+}
 
-  /* Love kecil */
-  .heart{
+/* WRAPPER */
+.wrap{
     position:absolute;
     left:50%;
     top:50%;
+    transform:translate(-50%,-50%);
+}
+
+/* LOVE (DI BAWAH TEKS) */
+.heart{
+    position:absolute;
     width:70px;
     height:70px;
-    transform: translate(-50%, -50%) rotate(-45deg);
     background:#ff1e56;
+    transform:translate(-50%,-50%) rotate(-45deg);
     border-radius:10px;
-    cursor:pointer;
-    transition: transform 0.18s ease;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-  }
-  .heart::before, .heart::after{
+    z-index:1;
+    transition:transform .18s ease;
+}
+.heart::before,
+.heart::after{
     content:"";
     position:absolute;
     width:70px;
     height:70px;
     background:#ff1e56;
     border-radius:50%;
-  }
-  .heart::before{ top:-35px; left:0; }
-  .heart::after{ left:35px; top:0; }
+}
+.heart::before{top:-35px;left:0;}
+.heart::after{left:35px;top:0;}
 
-  /* Nama di atas love (tidak ketutup) */
-  .name{
+/* TEKS DI ATAS LOVE (ANTI KETUTUP) */
+.label{
     position:absolute;
+    top:-28px;
     left:50%;
-    top:50%;
-    transform: translate(-50%, -120%);
-    font-weight:700;
-    font-size:22px;
-    text-shadow: 0 0 12px rgba(255,255,255,0.95);
-    pointer-events:none;
-  }
-
-  /* Text status */
-  .text{
-    margin-top:18px;
-    min-height:42px;
+    transform:translateX(-50%);
     font-size:22px;
     font-weight:800;
-    letter-spacing:1px;
-    opacity:0;                 /* penting: default hidden */
-    transform: translateY(6px);
-    transition: opacity .2s ease, transform .2s ease;
-  }
-  .text.show{
-    opacity:1;
-    transform: translateY(0);
-  }
+    white-space:nowrap;
+    text-shadow:0 0 14px rgba(255,255,255,.95);
+    z-index:10;
+    pointer-events:none;
+}
 
-  .hint{
-    margin-top:8px;
+/* TEKS STATUS */
+.text{
+    margin-top:16px;
+    min-height:40px;
+    font-size:22px;
+    font-weight:800;
+    opacity:0;
+    transition:.2s;
+}
+.text.show{opacity:1;}
+
+.hint{
     font-size:14px;
     opacity:.8;
-  }
+}
 
-  /* credit kecil */
-  .credit{
+.credit{
     position:fixed;
     bottom:10px;
     font-size:12px;
     opacity:.6;
-  }
+}
 </style>
 </head>
 
 <body>
-  <div class="stage" id="stage">
-    <div class="name" id="name">Syifa</div>
-    <div class="heart" id="heart" aria-label="love"></div>
-  </div>
 
-  <div class="text" id="text"></div>
-  <div class="hint" id="hint">Coba klik love-nya 😳 (dia bakal kabur dulu)</div>
-  <div class="credit">dibuat oleh Reza Afandi ❤️</div>
+<div class="stage" id="stage">
+    <div class="wrap" id="wrap">
+        <div class="label" id="label">Syifa Rahmadani</div>
+        <div class="heart" id="heart"></div>
+    </div>
+</div>
+
+<div class="text" id="text"></div>
+<div class="hint" id="hint">Coba klik love-nya 😳</div>
+<div class="credit">Dev by Tuan Muda ❤️</div>
 
 <script>
-  const heart = document.getElementById("heart");
-  const stage = document.getElementById("stage");
-  const text = document.getElementById("text");
-  const name = document.getElementById("name");
-  const hint = document.getElementById("hint");
+const stage = document.getElementById("stage");
+const wrap  = document.getElementById("wrap");
+const heart = document.getElementById("heart");
+const label = document.getElementById("label");
+const text  = document.getElementById("text");
+const hint  = document.getElementById("hint");
 
-  // jumlah kabur sebelum boleh klik beneran
-  const ESCAPE_LIMIT = 10;
+const MAX_ESCAPE = 10;
+let escapeCount = 0;
+let unlocked = false;
 
-  let escapeCount = 0;
-  let canClickForReal = false;
+// posisi awal
+let x = stage.clientWidth/2;
+let y = stage.clientHeight/2;
+setPos(x,y);
 
-  // posisi target (dalam px relatif stage)
-  let currentX = stage.clientWidth / 2;
-  let currentY = stage.clientHeight / 2;
+function setPos(px,py){
+    wrap.style.left = px+"px";
+    wrap.style.top  = py+"px";
+}
 
-  // set posisi heart berdasarkan koordinat stage
-  function setHeartPos(x, y){
-    heart.style.left = x + "px";
-    heart.style.top  = y + "px";
-    // heart sendiri sudah rotate, tapi posisinya absolut
-    heart.style.transform = "translate(-50%, -50%) rotate(-45deg)";
-    // nama ikut di atas love
-    name.style.left = x + "px";
-    name.style.top  = y + "px";
-  }
-
-  // pilih posisi baru yang "jauh"
-  function getFarPosition(fromX, fromY){
+function randomFar(){
+    const pad = 80;
     const w = stage.clientWidth;
     const h = stage.clientHeight;
 
-    // zona aman supaya tidak kepotong layar
-    const pad = 60;
+    let nx, ny, dist;
+    do{
+        nx = pad + Math.random()*(w-pad*2);
+        ny = pad + Math.random()*(h-pad*2);
+        dist = Math.hypot(nx-x, ny-y);
+    } while(dist < 220); // JAUH
 
-    // minimal jarak kabur (makin lama makin jauh)
-    const minDist = Math.min(220 + escapeCount * 15, 380);
+    return {x:nx,y:ny};
+}
 
-    let tries = 0;
-    while (tries < 50){
-      tries++;
+const dialog = [
+    "EH 😳",
+    "JANGAN 😰",
+    "AKU PANIK 😵‍💫",
+    "WOI 😱",
+    "UDAH 😭",
+    "MALU 🫣",
+    "KOK MAKSA 🥲",
+    "SEREM 😵",
+    "BENTAR 😬",
+    "OK PASRAH 😔"
+];
 
-      const x = pad + Math.random() * (w - pad*2);
-      const y = pad + Math.random() * (h - pad*2);
-
-      const dx = x - fromX;
-      const dy = y - fromY;
-      const dist = Math.hypot(dx, dy);
-
-      if (dist >= minDist) return {x,y};
-    }
-
-    // fallback: pojok random
-    const corners = [
-      {x: pad, y: pad},
-      {x: w - pad, y: pad},
-      {x: pad, y: h - pad},
-      {x: w - pad, y: h - pad},
-    ];
-    return corners[Math.floor(Math.random()*corners.length)];
-  }
-
-  function showPanic(){
-    // muncul hanya saat interaksi kabur (timing pas)
-    text.classList.add("show");
-
-    // variasi teks panik per tahap biar lucu + sesuai momen
-    const left = ESCAPE_LIMIT - escapeCount;
-    const lines = [
-      "EH! 😳",
-      "JANGAN! 😰",
-      "AKU PANIK 😵‍💫",
-      "WOI WOI 😱",
-      "STOPPP 😭",
-      "AKU MALU 🫣",
-      "KOK MAKSA 🥲",
-      "UDAH 10X YA?! 😵",
-      "BENTAR LAGI… 😬",
-      "OK… PASRAH 😔"
-    ];
-    const idx = Math.min(escapeCount-1, lines.length-1);
-    text.textContent = `${lines[idx]}  (${left}x lagi)`;
-  }
-
-  function showReady(){
-    text.classList.add("show");
-    text.textContent = "OKE… SEKARANG BOLEH KLIK 😌❤️";
-    hint.textContent = "Sekarang klik beneran ya!";
-  }
-
-  function finish(){
-    canClickForReal = true;
-    heart.style.cursor = "pointer";
-    name.textContent = "I Love You ❤️";
-    text.classList.add("show");
-    text.textContent = "Akhirnya ketangkep juga 💖";
-    hint.textContent = "Mantap 😄";
-  }
-
-  // posisi awal
-  setHeartPos(currentX, currentY);
-
-  // “mau klik” = kita pakai pointerdown supaya di HP kerasa responsif
-  heart.addEventListener("pointerdown", (e) => {
-    // cegah klik default dulu (biar gak “ke-klik” sebelum waktunya)
+heart.addEventListener("pointerdown",(e)=>{
     e.preventDefault();
 
-    // kalau belum waktunya: kabur
-    if (!canClickForReal){
-      escapeCount++;
+    if(!unlocked){
+        escapeCount++;
+        text.classList.add("show");
+        text.innerText = dialog[Math.min(escapeCount-1, dialog.length-1)] +
+            ` (${MAX_ESCAPE-escapeCount}x)`;
 
-      showPanic();
+        if(escapeCount >= MAX_ESCAPE){
+            unlocked = true;
+            text.innerText = "OKE… SEKARANG BOLEH DIKLIK 😌❤️";
+            hint.innerText = "Klik sekali lagi 😉";
+            return;
+        }
 
-      // setelah 10x kabur → siap diklik beneran
-      if (escapeCount >= ESCAPE_LIMIT){
-        canClickForReal = true;
-        showReady();
+        const pos = randomFar();
+        x = pos.x; y = pos.y;
+        setPos(x,y);
         return;
-      }
-
-      // pindah jauh
-      const next = getFarPosition(currentX, currentY);
-      currentX = next.x;
-      currentY = next.y;
-      setHeartPos(currentX, currentY);
-      return;
     }
 
-    // kalau sudah waktunya: klik beneran
-    finish();
-  });
-
-  // biar saat resize tetap aman
-  window.addEventListener("resize", () => {
-    const w = stage.clientWidth;
-    const h = stage.clientHeight;
-    currentX = Math.max(60, Math.min(w-60, currentX));
-    currentY = Math.max(60, Math.min(h-60, currentY));
-    setHeartPos(currentX, currentY);
-  });
+    // AKHIR
+    label.innerText = "I Love You ❤️";
+    text.innerText = "Akhirnya ketangkep juga 💖";
+    hint.innerText = "FINISH 😄";
+});
 </script>
 
 </body>

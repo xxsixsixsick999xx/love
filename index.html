@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Love with Name</title>
+<title>Love</title>
 
 <style>
 body {
@@ -14,18 +14,11 @@ body {
     justify-content: center;
     align-items: center;
     height: 100vh;
-    overflow: hidden;
     font-family: Arial, sans-serif;
+    overflow: hidden;
 }
 
-/* Button reset */
-button {
-    background: none;
-    border: none;
-    padding: 0;
-}
-
-/* Love Shape */
+/* Heart */
 .heart {
     position: relative;
     width: 200px;
@@ -33,7 +26,6 @@ button {
     background: #ff1e56;
     transform: rotate(-45deg);
     animation: beat 1s infinite;
-    cursor: pointer;
 }
 
 .heart::before,
@@ -56,18 +48,17 @@ button {
     top: 0;
 }
 
-/* Name in the center */
+/* Name */
 .name {
     position: absolute;
-    width: 100%;
-    text-align: center;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(45deg);
     color: white;
     font-size: 28px;
     font-weight: bold;
-    text-shadow: 0 0 10px rgba(255,255,255,0.8);
+    text-shadow: 0 0 12px rgba(255,255,255,0.9);
+    z-index: 10;
     pointer-events: none;
 }
 
@@ -76,18 +67,36 @@ button {
     margin-top: 30px;
     color: white;
     font-size: 18px;
-    opacity: 0.8;
+    opacity: 0.85;
 }
 
-/* Beat animation */
+/* Love particle */
+.love {
+    position: absolute;
+    font-size: 20px;
+    animation: floatUp 2s ease-out forwards;
+    pointer-events: none;
+}
+
+/* Animations */
 @keyframes beat {
     0% { transform: rotate(-45deg) scale(1); }
     50% { transform: rotate(-45deg) scale(1.1); }
     100% { transform: rotate(-45deg) scale(1); }
 }
 
-/* After tap */
-.stopped {
+@keyframes floatUp {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-120px) scale(1.8);
+        opacity: 0;
+    }
+}
+
+.stop {
     animation: none;
 }
 </style>
@@ -95,23 +104,36 @@ button {
 
 <body>
 
-<button id="heartBtn">
-    <div class="heart" id="heart">
-        <div class="name" id="name">Syifa</div>
-    </div>
-</button>
+<div class="heart" id="heart">
+    <div class="name" id="name">Syifa</div>
+</div>
 
-<div class="tap" id="tapText">Tap untuk mulai</div>
+<div class="tap" id="tap">Tap untuk mulai</div>
 
 <script>
-let started = false;
+let sudah = false;
 
-document.getElementById("heartBtn").addEventListener("click", function () {
-    if (!started) {
-        started = true;
-        document.getElementById("heart").classList.add("stopped");
-        document.getElementById("name").innerText = "I Love You 💖";
-        document.getElementById("tapText").innerText = "Selamanya ❤️";
+document.body.addEventListener("click", function (e) {
+    if (!sudah) {
+        sudah = true;
+        document.getElementById("heart").classList.add("stop");
+        document.getElementById("name").innerText = "I Love You ❤️";
+    }
+
+    // create love particles
+    for (let i = 0; i < 8; i++) {
+        const love = document.createElement("span");
+        love.className = "love";
+        love.innerText = "❤️";
+
+        love.style.left = (e.clientX + Math.random() * 40 - 20) + "px";
+        love.style.top = (e.clientY + Math.random() * 40 - 20) + "px";
+
+        document.body.appendChild(love);
+
+        setTimeout(() => {
+            love.remove();
+        }, 2000);
     }
 });
 </script>

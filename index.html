@@ -3,151 +3,118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Love Final</title>
+<title>Love with Name</title>
 
 <style>
 body {
-  margin: 0;
-  overflow: hidden;
-  background: radial-gradient(circle, #ff758f, #ff1e56);
-  font-family: Arial, sans-serif;
+    margin: 0;
+    background: radial-gradient(circle, #ff4d6d, #c9184a);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
 }
 
-/* START SCREEN */
-#start {
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle,#ff4d6d,#c9184a);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-  color: white;
-  font-size: 26px;
-  font-weight: bold;
-  text-align: center;
-  cursor: pointer;
+/* Button reset */
+button {
+    background: none;
+    border: none;
+    padding: 0;
 }
 
-/* HEART */
+/* Love Shape */
 .heart {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  transform: rotate(-45deg);
-  animation: beat 1.2s infinite;
-  z-index: 1;
+    position: relative;
+    width: 200px;
+    height: 200px;
+    background: #ff1e56;
+    transform: rotate(-45deg);
+    animation: beat 1s infinite;
+    cursor: pointer;
 }
 
 .heart::before,
 .heart::after {
-  content: "";
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background: inherit;
+    content: "";
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: #ff1e56;
+    border-radius: 50%;
 }
 
-.heart::before { top: -60px; left: 0; }
-.heart::after { left: 60px; top: 0; }
+.heart::before {
+    top: -100px;
+    left: 0;
+}
 
-/* NAME */
+.heart::after {
+    left: 100px;
+    top: 0;
+}
+
+/* Name in the center */
 .name {
-  position: absolute;
-  z-index: 10;
-  padding: 10px 22px;
-  border-radius: 25px;
-  background: rgba(0,0,0,0.55);
-  color: white;
-  font-size: 26px;
-  font-weight: bold;
-  letter-spacing: 2px;
-  animation: fade 3s forwards;
-  text-shadow: 0 0 12px #ffccd5;
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255,255,255,0.8);
+    pointer-events: none;
 }
 
-/* ANIMATIONS */
+/* Tap text */
+.tap {
+    margin-top: 30px;
+    color: white;
+    font-size: 18px;
+    opacity: 0.8;
+}
+
+/* Beat animation */
 @keyframes beat {
-  0% { transform: rotate(-45deg) scale(1); }
-  50% { transform: rotate(-45deg) scale(1.18); }
-  100% { transform: rotate(-45deg) scale(1); }
+    0% { transform: rotate(-45deg) scale(1); }
+    50% { transform: rotate(-45deg) scale(1.1); }
+    100% { transform: rotate(-45deg) scale(1); }
 }
 
-@keyframes fade {
-  0% { opacity: 0; transform: translateY(10px); }
-  20% { opacity: 1; }
-  80% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-15px); }
+/* After tap */
+.stopped {
+    animation: none;
 }
 </style>
 </head>
 
 <body>
 
-<div id="start">💖 TAP UNTUK MULAI 💖</div>
+<button id="heartBtn">
+    <div class="heart" id="heart">
+        <div class="name" id="name">Syifa</div>
+    </div>
+</button>
 
-<audio id="music" loop preload="auto">
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0f78faec3a.mp3">
-</audio>
+<div class="tap" id="tapText">Tap untuk mulai</div>
 
 <script>
-const names = ["SYIFA❤️"];
-const colors = [
-  "linear-gradient(135deg,#ff4d6d,#ff758f)",
-  "linear-gradient(135deg,#ff9a9e,#fad0c4)",
-  "linear-gradient(135deg,#fbc2eb,#a6c1ee)",
-  "linear-gradient(135deg,#a18cd1,#fbc2eb)"
-];
-
-const music = document.getElementById("music");
-const start = document.getElementById("start");
 let started = false;
 
-start.addEventListener("click", () => {
-  music.play().then(() => {
-    start.style.display = "none";
-    started = true;
-  }).catch(() => alert("Tap sekali lagi untuk aktifkan suara"));
+document.getElementById("heartBtn").addEventListener("click", function () {
+    if (!started) {
+        started = true;
+        document.getElementById("heart").classList.add("stopped");
+        document.getElementById("name").innerText = "I Love You 💖";
+        document.getElementById("tapText").innerText = "Selamanya ❤️";
+    }
 });
-
-function spawn(x, y) {
-  if (!started) return;
-
-  const heart = document.createElement("div");
-  heart.className = "heart";
-  heart.style.left = (x - 60) + "px";
-  heart.style.top = (y - 10) + "px";
-  heart.style.background = colors[Math.floor(Math.random() * colors.length)];
-  document.body.appendChild(heart);
-
-  const name = document.createElement("div");
-  name.className = "name";
-  name.innerText = names[Math.floor(Math.random() * names.length)];
-  name.style.left = (x - 60) + "px";
-  name.style.top = (y - 120) + "px"; // 🔥 SELALU DI ATAS LOVE
-  document.body.appendChild(name);
-
-  setTimeout(() => {
-    heart.remove();
-    name.remove();
-  }, 3500);
-}
-
-document.addEventListener("click", e => {
-  spawn(e.clientX, e.clientY);
-});
-
-setInterval(() => {
-  if (started) {
-    spawn(
-      Math.random() * window.innerWidth,
-      Math.random() * window.innerHeight
-    );
-  }
-}, 1600);
 </script>
 
 </body>
 </html>
-

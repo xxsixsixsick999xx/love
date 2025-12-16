@@ -16,6 +16,7 @@ body {
     height: 100vh;
     font-family: Arial, sans-serif;
     overflow: hidden;
+    color: white;
 }
 
 /* Heart */
@@ -54,27 +55,35 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) rotate(45deg);
-    color: white;
-    font-size: 28px;
+    font-size: 26px;
     font-weight: bold;
     text-shadow: 0 0 12px rgba(255,255,255,0.9);
     z-index: 10;
     pointer-events: none;
 }
 
-/* Tap text */
+/* Text */
 .tap {
     margin-top: 30px;
-    color: white;
     font-size: 18px;
-    opacity: 0.85;
+    opacity: 0.9;
+    min-height: 24px;
 }
 
-/* Love particle */
+/* Floating love */
 .love {
-    position: absolute;
+    position: fixed;
+    font-size: 18px;
+    pointer-events: none;
+    animation: floatUp 3s linear forwards;
+}
+
+/* Falling love */
+.fall {
+    position: fixed;
+    top: -20px;
     font-size: 20px;
-    animation: floatUp 2s ease-out forwards;
+    animation: fallDown linear forwards;
     pointer-events: none;
 }
 
@@ -86,12 +95,15 @@ body {
 }
 
 @keyframes floatUp {
-    0% {
-        transform: translateY(0) scale(1);
-        opacity: 1;
+    to {
+        transform: translateY(-150px) scale(1.8);
+        opacity: 0;
     }
-    100% {
-        transform: translateY(-120px) scale(1.8);
+}
+
+@keyframes fallDown {
+    to {
+        transform: translateY(120vh);
         opacity: 0;
     }
 }
@@ -108,36 +120,75 @@ body {
     <div class="name" id="name">Syifa</div>
 </div>
 
-<div class="tap" id="tap">Tap untuk mulai</div>
+<div class="tap" id="text">Tap untuk mulai</div>
+
+<!-- MUSIC -->
+<audio id="music" loop>
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_7c91b6bb74.mp3" type="audio/mpeg">
+</audio>
 
 <script>
-let sudah = false;
+let started = false;
+const colors = ["❤️","💖","💗","💓","💕","💘"];
+const message = "Aku sayang kamu, hari ini, besok, dan selamanya ❤️";
+let index = 0;
 
-document.body.addEventListener("click", function (e) {
-    if (!sudah) {
-        sudah = true;
-        document.getElementById("heart").classList.add("stop");
-        document.getElementById("name").innerText = "Love You";
+// Fullscreen
+function goFullscreen() {
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen();
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
+
+// Typewriter
+function typeText() {
+    if (index < message.length) {
+        document.getElementById("text").innerText += message.charAt(index);
+        index++;
+        setTimeout(typeText, 80);
     }
+}
 
-    // create love particles
-    for (let i = 0; i < 8; i++) {
-        const love = document.createElement("span");
-        love.className = "love";
-        love.innerText = "❤️";
-
-        love.style.left = (e.clientX + Math.random() * 40 - 20) + "px";
-        love.style.top = (e.clientY + Math.random() * 40 - 20) + "px";
-
+// Falling love
+function startRain() {
+    setInterval(() => {
+        const love = document.createElement("div");
+        love.className = "fall";
+        love.innerText = colors[Math.floor(Math.random() * colors.length)];
+        love.style.left = Math.random() * 100 + "vw";
+        love.style.animationDuration = (3 + Math.random() * 3) + "s";
         document.body.appendChild(love);
 
-        setTimeout(() => {
-            love.remove();
-        }, 2000);
+        setTimeout(() => love.remove(), 6000);
+    }, 300);
+}
+
+// Click event
+document.body.addEventListener("click", (e) => {
+    if (!started) {
+        started = true;
+        goFullscreen();
+        document.getElementById("heart").classList.add("stop");
+        document.getElementById("name").innerText = "Love You💕";
+        document.getElementById("text").innerText = "";
+        document.getElementById("music").play();
+        typeText();
+        startRain();
+    }
+
+    // floating love
+    for (let i = 0; i < 6; i++) {
+        const love = document.createElement("div");
+        love.className = "love";
+        love.innerText = colors[Math.floor(Math.random() * colors.length)];
+        love.style.left = e.clientX + (Math.random()*40-20) + "px";
+        love.style.top = e.clientY + (Math.random()*40-20) + "px";
+        document.body.appendChild(love);
+
+        setTimeout(() => love.remove(), 3000);
     }
 });
 </script>
 
 </body>
 </html>
-

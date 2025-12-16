@@ -17,6 +17,7 @@ body {
     font-family: Arial, sans-serif;
     overflow: hidden;
     color: white;
+    text-align: center;
 }
 
 /* Heart */
@@ -27,6 +28,9 @@ body {
     background: #ff1e56;
     transform: rotate(-45deg);
     animation: beat 1s infinite;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .heart::before,
@@ -51,10 +55,7 @@ body {
 
 /* Name */
 .name {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(45deg);
+    transform: rotate(45deg);
     font-size: 26px;
     font-weight: bold;
     text-shadow: 0 0 12px rgba(255,255,255,0.9);
@@ -62,20 +63,21 @@ body {
     pointer-events: none;
 }
 
-/* Text */
-.tap {
+/* Message */
+.text {
     margin-top: 30px;
     font-size: 18px;
-    opacity: 0.9;
-    min-height: 24px;
+    max-width: 90%;
+    white-space: pre-wrap; /* FIX SPASI */
+    min-height: 50px;
 }
 
 /* Floating love */
 .love {
     position: fixed;
-    font-size: 18px;
+    font-size: 20px;
     pointer-events: none;
-    animation: floatUp 3s linear forwards;
+    animation: floatUp 3s ease-out forwards;
 }
 
 /* Falling love */
@@ -87,6 +89,14 @@ body {
     pointer-events: none;
 }
 
+/* Credit */
+.credit {
+    position: fixed;
+    bottom: 10px;
+    font-size: 12px;
+    opacity: 0.6;
+}
+
 /* Animations */
 @keyframes beat {
     0% { transform: rotate(-45deg) scale(1); }
@@ -96,7 +106,7 @@ body {
 
 @keyframes floatUp {
     to {
-        transform: translateY(-150px) scale(1.8);
+        transform: translateY(-160px) scale(1.8);
         opacity: 0;
     }
 }
@@ -120,7 +130,9 @@ body {
     <div class="name" id="name">Syifa</div>
 </div>
 
-<div class="tap" id="text">Tap untuk mulai</div>
+<div class="text" id="text">Tap untuk mulai</div>
+
+<div class="credit">dibuat oleh Reza Afandi ❤️</div>
 
 <!-- MUSIC -->
 <audio id="music" loop>
@@ -129,8 +141,8 @@ body {
 
 <script>
 let started = false;
-const colors = ["❤️","💖","💗","💓","💕","💘"];
-const message = "Aku sayang kamu, hari ini, besok, dan selamanya ❤️";
+const loves = ["❤️","💖","💗","💓","💕","💘"];
+const message = "Aku sayang kamu,\nhari ini,\nbesok,\ndan selamanya ❤️";
 let index = 0;
 
 // Fullscreen
@@ -140,53 +152,59 @@ function goFullscreen() {
     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
 }
 
-// Typewriter
-function typeText() {
-    if (index < message.length) {
-        document.getElementById("text").innerText += message.charAt(index);
-        index++;
-        setTimeout(typeText, 80);
+// Fireworks love
+function firework(x, y) {
+    for (let i = 0; i < 10; i++) {
+        const love = document.createElement("div");
+        love.className = "love";
+        love.innerText = loves[Math.floor(Math.random()*loves.length)];
+        love.style.left = x + "px";
+        love.style.top = y + "px";
+        love.style.transform = `translate(${Math.random()*200-100}px, ${Math.random()*-200}px)`;
+        document.body.appendChild(love);
+        setTimeout(()=>love.remove(),3000);
     }
 }
 
-// Falling love
+// Typewriter + fireworks
+function typeText() {
+    if (index < message.length) {
+        const textEl = document.getElementById("text");
+        textEl.innerText += message[index];
+
+        firework(window.innerWidth/2, window.innerHeight/2);
+        index++;
+        setTimeout(typeText, 90);
+    }
+}
+
+// Love rain
 function startRain() {
     setInterval(() => {
         const love = document.createElement("div");
         love.className = "fall";
-        love.innerText = colors[Math.floor(Math.random() * colors.length)];
-        love.style.left = Math.random() * 100 + "vw";
-        love.style.animationDuration = (3 + Math.random() * 3) + "s";
+        love.innerText = loves[Math.floor(Math.random()*loves.length)];
+        love.style.left = Math.random()*100 + "vw";
+        love.style.animationDuration = (3+Math.random()*3)+"s";
         document.body.appendChild(love);
-
-        setTimeout(() => love.remove(), 6000);
+        setTimeout(()=>love.remove(),6000);
     }, 300);
 }
 
-// Click event
-document.body.addEventListener("click", (e) => {
-    if (!started) {
-        started = true;
-        goFullscreen();
-        document.getElementById("heart").classList.add("stop");
-        document.getElementById("name").innerText = "Love You💕";
-        document.getElementById("text").innerText = "";
-        document.getElementById("music").play();
-        typeText();
-        startRain();
-    }
+document.body.addEventListener("click", () => {
+    if (started) return;
+    started = true;
 
-    // floating love
-    for (let i = 0; i < 6; i++) {
-        const love = document.createElement("div");
-        love.className = "love";
-        love.innerText = colors[Math.floor(Math.random() * colors.length)];
-        love.style.left = e.clientX + (Math.random()*40-20) + "px";
-        love.style.top = e.clientY + (Math.random()*40-20) + "px";
-        document.body.appendChild(love);
+    goFullscreen();
+    document.getElementById("heart").classList.add("stop");
+    document.getElementById("name").innerText = "I Love You ❤️";
+    document.getElementById("text").innerText = "";
 
-        setTimeout(() => love.remove(), 3000);
-    }
+    const music = document.getElementById("music");
+    music.play().catch(()=>{});
+
+    typeText();
+    startRain();
 });
 </script>
 

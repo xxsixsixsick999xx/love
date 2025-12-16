@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Love</title>
+<title>Love Kabur</title>
 
 <style>
 body {
@@ -28,9 +28,7 @@ body {
     background: #ff1e56;
     transform: rotate(-45deg);
     animation: beat 1s infinite;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    transition: transform 0.25s ease;
 }
 
 .heart::before,
@@ -53,69 +51,30 @@ body {
     top: 0;
 }
 
-/* Name */
+/* Text in heart */
 .name {
-    transform: rotate(45deg);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(45deg);
     font-size: 26px;
     font-weight: bold;
-    text-shadow: 0 0 12px rgba(255,255,255,0.9);
-    z-index: 10;
+    text-shadow: 0 0 10px rgba(255,255,255,0.9);
     pointer-events: none;
 }
 
-/* Message */
+/* Info text */
 .text {
     margin-top: 30px;
     font-size: 18px;
-    max-width: 90%;
-    white-space: pre-wrap; /* FIX SPASI */
-    min-height: 50px;
+    opacity: 0.9;
 }
 
-/* Floating love */
-.love {
-    position: fixed;
-    font-size: 20px;
-    pointer-events: none;
-    animation: floatUp 3s ease-out forwards;
-}
-
-/* Falling love */
-.fall {
-    position: fixed;
-    top: -20px;
-    font-size: 20px;
-    animation: fallDown linear forwards;
-    pointer-events: none;
-}
-
-/* Credit */
-.credit {
-    position: fixed;
-    bottom: 10px;
-    font-size: 12px;
-    opacity: 0.6;
-}
-
-/* Animations */
+/* Animation */
 @keyframes beat {
     0% { transform: rotate(-45deg) scale(1); }
     50% { transform: rotate(-45deg) scale(1.1); }
     100% { transform: rotate(-45deg) scale(1); }
-}
-
-@keyframes floatUp {
-    to {
-        transform: translateY(-160px) scale(1.8);
-        opacity: 0;
-    }
-}
-
-@keyframes fallDown {
-    to {
-        transform: translateY(120vh);
-        opacity: 0;
-    }
 }
 
 .stop {
@@ -130,84 +89,49 @@ body {
     <div class="name" id="name">Syifa</div>
 </div>
 
-<div class="text" id="text">Tap untuk mulai</div>
-
-<div class="credit">Dev by Tuan Muda Reza Afandi ❤️</div>
-
-<!-- MUSIC -->
-<audio id="music" loop>
-    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_7c91b6bb74.mp3" type="audio/mpeg">
-</audio>
+<div class="text" id="text">Coba klik love-nya 😳</div>
 
 <script>
-let started = false;
-const loves = ["❤️","💖","💗","💓","💕","💘"];
-const message = "Aku sayang kamu,\nHari ini,\nBesok,\nDan selamanya ❤️";
-let index = 0;
+const heart = document.getElementById("heart");
+const text = document.getElementById("text");
 
-// Fullscreen
-function goFullscreen() {
-    const el = document.documentElement;
-    if (el.requestFullscreen) el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-}
+let sudahKlik = false;
+let kaburCount = 0;
 
-// Fireworks love
-function firework(x, y) {
-    for (let i = 0; i < 10; i++) {
-        const love = document.createElement("div");
-        love.className = "love";
-        love.innerText = loves[Math.floor(Math.random()*loves.length)];
-        love.style.left = x + "px";
-        love.style.top = y + "px";
-        love.style.transform = `translate(${Math.random()*200-100}px, ${Math.random()*-200}px)`;
-        document.body.appendChild(love);
-        setTimeout(()=>love.remove(),3000);
+/* LOVE KABUR */
+function kabur() {
+    if (sudahKlik) return;
+
+    kaburCount++;
+
+    const x = Math.random() * 80 - 40;
+    const y = Math.random() * 80 - 40;
+
+    heart.style.transform =
+        `rotate(-45deg) translate(${x}px, ${y}px)`;
+
+    text.innerText = "Eh jangan 😳 aku malu...";
+
+    // Setelah 4x kabur → akhirnya mau
+    if (kaburCount >= 4) {
+        sudahKlik = true;
+        setTimeout(jadiManis, 300);
     }
 }
 
-// Typewriter + fireworks
-function typeText() {
-    if (index < message.length) {
-        const textEl = document.getElementById("text");
-        textEl.innerText += message[index];
-
-        firework(window.innerWidth/2, window.innerHeight/2);
-        index++;
-        setTimeout(typeText, 90);
-    }
-}
-
-// Love rain
-function startRain() {
-    setInterval(() => {
-        const love = document.createElement("div");
-        love.className = "fall";
-        love.innerText = loves[Math.floor(Math.random()*loves.length)];
-        love.style.left = Math.random()*100 + "vw";
-        love.style.animationDuration = (3+Math.random()*3)+"s";
-        document.body.appendChild(love);
-        setTimeout(()=>love.remove(),6000);
-    }, 300);
-}
-
-document.body.addEventListener("click", () => {
-    if (started) return;
-    started = true;
-
-    goFullscreen();
-    document.getElementById("heart").classList.add("stop");
+/* JADI MANIS */
+function jadiManis() {
+    heart.classList.add("stop");
+    heart.style.transform = "rotate(-45deg)";
     document.getElementById("name").innerText = "I Love You ❤️";
-    document.getElementById("text").innerText = "";
+    text.innerText = "Yaudah deh... aku pasrah 💖";
+}
 
-    const music = document.getElementById("music");
-    music.play().catch(()=>{});
-
-    typeText();
-    startRain();
-});
+/* Event */
+heart.addEventListener("mouseenter", kabur);   // desktop
+heart.addEventListener("touchstart", kabur);  // mobile
+heart.addEventListener("click", jadiManis);   // kalau berhasil diklik
 </script>
 
 </body>
 </html>
-

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Love Ultimate</title>
+<title>Love Final</title>
 
 <style>
 body {
@@ -13,11 +13,27 @@ body {
   font-family: Arial, sans-serif;
 }
 
+/* START SCREEN */
+#start {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle,#ff4d6d,#c9184a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  color: white;
+  font-size: 26px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+}
+
 /* HEART */
 .heart {
   position: absolute;
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   transform: rotate(-45deg);
   animation: beat 1.2s infinite;
   z-index: 1;
@@ -27,55 +43,51 @@ body {
 .heart::after {
   content: "";
   position: absolute;
-  width: 140px;
-  height: 140px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   background: inherit;
 }
 
-.heart::before { top: -70px; left: 0; }
-.heart::after { left: 70px; top: 0; }
+.heart::before { top: -60px; left: 0; }
+.heart::after { left: 60px; top: 0; }
 
-/* NAME – DI ATAS LOVE */
+/* NAME */
 .name {
   position: absolute;
   z-index: 10;
-  padding: 8px 18px;
-  border-radius: 20px;
-  background: rgba(0,0,0,0.35);
-  backdrop-filter: blur(6px);
-  color: #fff;
+  padding: 10px 22px;
+  border-radius: 25px;
+  background: rgba(0,0,0,0.55);
+  color: white;
+  font-size: 26px;
   font-weight: bold;
-  font-size: 22px;
   letter-spacing: 2px;
-  opacity: 0;
   animation: fade 3s forwards;
-  text-shadow:
-    0 0 6px #fff,
-    0 0 12px #ffccd5,
-    0 0 20px #ff4d6d;
+  text-shadow: 0 0 12px #ffccd5;
 }
 
-/* ANIMATION */
+/* ANIMATIONS */
 @keyframes beat {
   0% { transform: rotate(-45deg) scale(1); }
-  50% { transform: rotate(-45deg) scale(1.15); }
+  50% { transform: rotate(-45deg) scale(1.18); }
   100% { transform: rotate(-45deg) scale(1); }
 }
 
 @keyframes fade {
   0% { opacity: 0; transform: translateY(10px); }
-  30% { opacity: 1; }
-  70% { opacity: 1; }
-  100% { opacity: 0; transform: translateY(-10px); }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-15px); }
 }
 </style>
 </head>
 
 <body>
 
-<!-- MUSIK -->
-<audio id="music" loop>
+<div id="start">💖 TAP UNTUK MULAI 💖</div>
+
+<audio id="music" loop preload="auto">
   <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0f78faec3a.mp3">
 </audio>
 
@@ -88,48 +100,52 @@ const colors = [
   "linear-gradient(135deg,#a18cd1,#fbc2eb)"
 ];
 
-let musicStarted = false;
+const music = document.getElementById("music");
+const start = document.getElementById("start");
+let started = false;
 
-function createLove(x, y) {
-  // LOVE
+start.addEventListener("click", () => {
+  music.play().then(() => {
+    start.style.display = "none";
+    started = true;
+  }).catch(() => alert("Tap sekali lagi untuk aktifkan suara"));
+});
+
+function spawn(x, y) {
+  if (!started) return;
+
   const heart = document.createElement("div");
   heart.className = "heart";
-  heart.style.left = (x - 70) + "px";
-  heart.style.top = (y - 70) + "px";
+  heart.style.left = (x - 60) + "px";
+  heart.style.top = (y - 10) + "px";
   heart.style.background = colors[Math.floor(Math.random() * colors.length)];
   document.body.appendChild(heart);
 
-  // NAME (TERPISAH & DI ATAS)
   const name = document.createElement("div");
   name.className = "name";
   name.innerText = names[Math.floor(Math.random() * names.length)];
-  name.style.left = (x - 40) + "px";
-  name.style.top = (y - 15) + "px";
+  name.style.left = (x - 60) + "px";
+  name.style.top = (y - 120) + "px"; // 🔥 SELALU DI ATAS LOVE
   document.body.appendChild(name);
 
   setTimeout(() => {
     heart.remove();
     name.remove();
-  }, 4000);
+  }, 3500);
 }
 
-// TAP LAYAR
-document.addEventListener("click", (e) => {
-  createLove(e.clientX, e.clientY);
-
-  if (!musicStarted) {
-    document.getElementById("music").play();
-    musicStarted = true;
-  }
+document.addEventListener("click", e => {
+  spawn(e.clientX, e.clientY);
 });
 
-// AUTO RANDOM
 setInterval(() => {
-  createLove(
-    Math.random() * window.innerWidth,
-    Math.random() * window.innerHeight
-  );
-}, 1400);
+  if (started) {
+    spawn(
+      Math.random() * window.innerWidth,
+      Math.random() * window.innerHeight
+    );
+  }
+}, 1600);
 </script>
 
 </body>
